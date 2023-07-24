@@ -29,7 +29,6 @@ namespace Application.Controllers
                     {
                         string[] values = line.Split(';');
 
-                        // Eðer satýrda yeterli sayýda deðer yoksa null döndürelim.
                         if (values.Length < 6)
                             return null;
 
@@ -61,10 +60,10 @@ namespace Application.Controllers
             try
             {
                 string newMeeting = $"{meeting.TeamName};{meeting.MeetingName};{meeting.MeetingDate};{meeting.MeetingTime};{meeting.MeetingContext};{meeting.MeetingContent}";
-                System.IO.File.AppendAllText(filePath, newMeeting + Environment.NewLine); //environment newlin = /n anlamýnda
+                System.IO.File.AppendAllText(filePath, newMeeting + Environment.NewLine); //environment newlin = /n anlamÃ½nda
 
-                // Baþarýlý yanýt dönelim.
-                return Ok("Toplantý eklendi...");
+                // BaÃ¾arÃ½lÃ½ yanÃ½t dÃ¶nelim.
+                return Ok("ToplantÃ½ eklendi...");
             }
             catch (Exception ex)
             {
