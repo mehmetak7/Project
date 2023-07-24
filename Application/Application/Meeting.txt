@@ -1,0 +1,5 @@
+﻿Orion;Daily Meeting;04/04/2023;10:30;Talking about what it is done;Every teams employee must attend
+Doremigos;Daily Meeting;04/04/2023;10:30;Talking about what it is done;Every teams employee must attend
+Rocket;Daily Meeting;04/04/2023;10:30;Talking about what it is done;Every teams employee must attend
+Prensesler;Çay saati;24.07.2023 00:00:00;24.07.2023 10:30:00;toplantı toplantı toplantı;bla bla bla bla bla
+string;string;24.07.2023 11:00:12;24.07.2023 11:30:12;string;string
