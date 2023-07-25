@@ -12,7 +12,7 @@ namespace Application.Controllers
     public class BDayController : Controller
     {
         string filePath = "Users.txt";
-        [HttpGet]
+        [HttpPost("GetAllBDay")]
         public ActionResult GetAllBDay()
         {
             try
