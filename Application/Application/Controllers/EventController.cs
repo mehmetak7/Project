@@ -15,7 +15,7 @@ namespace Application.Controllers
     public class EventController : ControllerBase
     {
         public static Functions functions = new Functions();
-        [HttpGet]
+        [HttpPost("GetEvent")]
         public IActionResult GetEvent()
         {
             try
@@ -51,7 +51,7 @@ namespace Application.Controllers
             }
         }
 
-        [HttpPost]
+        [HttpPost("PostEvent")]
         public IActionResult PostEvent([FromBody] EventRequest eventRequest)
         {
             if (eventRequest == null)
