@@ -15,6 +15,7 @@ namespace Application.Models
     {
         public bool IsSuccessfull { get; set; }
         public string Message { get; set; }
+        public bool IsBirthday { get; set; }
     }
 
 
