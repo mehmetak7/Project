@@ -42,7 +42,7 @@ namespace Application.Controllers
                     .Where(action => action != null)
                     .ToList();
 
-                return Ok(events.OrderBy(e => e.EventDateTime).ToList());
+                return Ok(events.OrderBy(e => e.MeatingDateTime).ToList());
 
             }
             catch (Exception ex)
