@@ -46,7 +46,7 @@ namespace Application.Controllers
                     .Where(meeting => meeting != null)
                     .ToList();
 
-                return Ok(meetings);
+                return Ok(meetings.OrderBy(e => e.MeetingDate).ToList());
             }
             catch (Exception ex)
             {
@@ -63,7 +63,7 @@ namespace Application.Controllers
                 System.IO.File.AppendAllText(filePath, newMeeting + Environment.NewLine); //environment newlin = /n anlamýnda
 
                 // Baþarýlý yanýt dönelim.
-                return Ok("Toplantý eklendi...");
+                return Ok("Toplanti eklendi...");
             }
             catch (Exception ex)
             {
