@@ -18,7 +18,7 @@ namespace Application.Controllers
     public class LoginController : ControllerBase
     {
         public static Functions functions = new Functions();
-        [HttpPost]
+        [HttpPost("Login")]
         public ActionResult Login([FromBody] LoginRequest loginRequest)
         {
 
