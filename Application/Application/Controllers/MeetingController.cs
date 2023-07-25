@@ -19,7 +19,7 @@ namespace Application.Controllers
     {
         string filePath = "Meeting.txt";
 
-        [HttpGet]
+        [HttpPost("GetMeeting")]
         public IActionResult GetMeeting()
         {
             try
@@ -54,7 +54,7 @@ namespace Application.Controllers
             }
         }
 
-        [HttpPost]
+        [HttpPost("AddMeeting")]
         public IActionResult AddMeeting([FromBody] MeetingRequest meeting)
         {
             try
