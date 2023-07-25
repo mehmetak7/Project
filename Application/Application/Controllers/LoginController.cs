@@ -1,4 +1,4 @@
-﻿using Application.Helper;
+using Application.Helper;
 using Application.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -17,18 +17,14 @@ namespace Application.Controllers
     [ApiController]
     public class LoginController : ControllerBase
     {
-
         public static Functions functions = new Functions();
-        // POST: api/Login/login
-        //[HttpPost("login")]
         [HttpPost]
         public ActionResult Login([FromBody] LoginRequest loginRequest)
         {
-            
+
             string logins = functions.LoadLoginsFromFile("Users.txt", loginRequest.SicilNo);
             int? SicilNo;
             string Sifre;
-
             //mevcut listede kullanıcıyı bul...
             //var user = logins.FirstOrDefault(l => l.SicilNo == loginRequest.SicilNo);
             //kullanıcı yok veya sifre eslesmiyorsa...
@@ -48,13 +44,24 @@ namespace Application.Controllers
                     };
                     return BadRequest(response); //400 Bad Request döner..
                 }
-                var successResponse = new LoginResponse
+                else
                 {
-                    IsSuccessfull = true,
-                    Message = "Giriş basarili"
-                };
-                return Ok(successResponse);
+                    #region Doğum Günü Kontrolü
+                    bool isBirthday = false;
+                    //Kontrol
+                    isBirthday = functions.LoadBDay("Users.txt", loginRequest.SicilNo);
 
+
+                    #endregion
+
+                    var successResponse = new LoginResponse
+                    {
+                        IsSuccessfull = true,
+                        Message = "Giriş basarili",
+                        IsBirthday = isBirthday
+                    };
+                    return Ok(successResponse);
+                }
             }
             else
             {
@@ -66,7 +73,7 @@ namespace Application.Controllers
                 };
                 return BadRequest(response); //Kullanıcı Null dönerse...
             }
-            
+
         }
     }
 
