@@ -31,6 +31,8 @@ namespace Application.Helper
         }
     }
 
+       
+        /*
         public bool LoadBDay(string filepath, int InputSicilNo)
         {
             var BDay = string.Empty;
@@ -48,17 +50,61 @@ namespace Application.Helper
                 string[] dateBD = date.Split("/");
                 if (string.Compare(dateBD[0], today[0]) == string.Compare(today[1], dateBD[1]))
                 {
-                    check = true;
+                        check = true;
                 }
                 else
                     check = false;
 
                 return (int.TryParse(parts[0], out int sicilNo) && sicilNo == InputSicilNo) && (string.Compare(dateBD[0], today[0]) == string.Compare(today[1], dateBD[1]));
             });
+            
 
             return check;
             
 
+        }
+        //Burada hata var date'ler tutuyorsa da liste dönüyor her türlü false dönüyor sicilNo kontrolü yani sadece
+        //o kişinin doğuum günü mü değil mi o yapılmıyor... asagidaki fonksiyon sadece login de girilen kişinin doğum günü mü
+        //değil mi o yapılıyor...
+        */
+        public bool IsBirthdayToday(string filepath, int InputSicilNo)
+        {
+            string todayDate = DateTime.Now.ToString("dd/MM");
+            bool isBirthdayToday = false;
+            int? test = InputSicilNo;
+
+            if (InputSicilNo != null)
+            {
+                string[] lines = System.IO.File.ReadAllLines(filepath);
+
+                var birthdayLine = lines.FirstOrDefault(line =>
+                {
+                    string[] parts = line.Split(";");
+
+                    int sicilNo;
+                    string date = parts[parts.Length - 1];
+
+                    if (int.TryParse(parts[0], out sicilNo) && sicilNo == InputSicilNo)
+                    {
+                        string[] dateBD = date.Split("/");
+                        string birthday = dateBD[0] + "." + dateBD[1];
+
+                        if (birthday == todayDate)
+                        {
+                            isBirthdayToday = true;
+                            return true;
+                        }
+                    }
+
+                    return false;
+                });
+            }
+            else
+            {
+                return false;
+            }
+            
+            return isBirthdayToday;     
         }
     }
 }
