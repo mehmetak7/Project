@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using static System.Collections.Specialized.BitVector32;
 
 
 namespace Application.Controllers
@@ -24,6 +25,8 @@ namespace Application.Controllers
         {
             try
             {
+                var today = DateTime.Today;
+
                 var meetings = System.IO.File.ReadAllLines(filePath)
                     .Select(line =>
                     {
@@ -43,16 +46,17 @@ namespace Application.Controllers
                             MeetingContent = values[5]
                         };
                     })
-                    .Where(meeting => meeting != null)
+                    .Where(meeting => meeting != null && meeting.MeetingDate >= today)
                     .ToList();
 
-                return Ok(meetings.OrderBy(e => e.MeetingDate).ToList());
+                return Ok(meetings.OrderBy(meeting => meeting.MeetingDate).ToList());
             }
             catch (Exception ex)
             {
                 return StatusCode(500, $"Error: {ex.Message}");
             }
         }
+
 
         [HttpPost("AddMeeting")]
         public IActionResult AddMeeting([FromBody] MeetingRequest meeting)
