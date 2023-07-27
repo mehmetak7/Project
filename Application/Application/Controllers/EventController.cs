@@ -1,4 +1,4 @@
-﻿using Application.Helper;
+using Application.Helper;
 using Application.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -20,6 +20,8 @@ namespace Application.Controllers
         {
             try
             {
+                var today = DateTime.Today;
+
                 var events = System.IO.File.ReadAllLines("Events.txt")
                     .Select(line =>
                     {
@@ -30,8 +32,6 @@ namespace Application.Controllers
 
                         return new EventResponse
                         {
-                            // IsSuccessfull = true,
-                            // Message = "Basarili",
                             EventName = values[0],
                             EventType = values[1],
                             MeatingDateTime = DateTime.Parse(values[2]),
@@ -39,17 +39,17 @@ namespace Application.Controllers
                         };
 
                     })
-                    .Where(action => action != null)
+                    .Where(action => action != null && action.MeatingDateTime >= today)
                     .ToList();
 
                 return Ok(events.OrderBy(e => e.MeatingDateTime).ToList());
-
             }
             catch (Exception ex)
             {
                 return StatusCode(500, $"Error : {ex.Message}");
             }
         }
+
 
         [HttpPost("PostEvent")]
         public IActionResult PostEvent([FromBody] EventRequest eventRequest)
