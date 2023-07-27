@@ -1,4 +1,4 @@
-﻿using Application.Helper;
+using Application.Helper;
 using Application.Models;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -17,28 +17,31 @@ namespace Application.Controllers
         {
             try
             {
-                string todayDate = DateTime.Now.ToString();
-                string[] today = todayDate.Split(".");
+                string todayDate = DateTime.Now.ToString("dd.MM.yyyy");
                 var Bdays = System.IO.File.ReadAllLines(filePath)
                     .Select(line =>
                     {
                         string[] values = line.Split(';');
-                        string date = values[values.Length - 1];
-                        string[] dateBD = date.Split("/");
-                        return new BDayResponse
+                        if (values.Length >= 5) 
                         {
-                            Name = values[2],
-                            Surname = values[3],
-                            BirthDay = values[4]
-                        };
+                            string date = values[4];
+                            string[] dateBD = date.Split("/");
+                            return new BDayResponse
+                            {
+                                Name = values[2],
+                                Surname = values[3],
+                                BirthDay = values[4]
+                            };
+                        }
+                        return null;
                     })
-                    .Where(bdayResponse =>
-                    {
-                        int compareDateResult = string.Compare(today[0], bdayResponse.BirthDay.Split('/')[0]);
-                        int compareTimeResult = string.Compare(today[1], bdayResponse.BirthDay.Split('/')[1]);
+                   .Where(bdayResponse =>
+                   {
+                       int compareDateResult = string.Compare(todayDate.Split(".")[0], bdayResponse.BirthDay.Split('/')[0]);
+                       int compareTimeResult = string.Compare(todayDate.Split(".")[1], bdayResponse.BirthDay.Split("/")[1]);
 
-                        return compareDateResult == 0 && compareTimeResult == 0;
-                    })
+                       return compareDateResult == 0 && compareTimeResult == 0;
+                   })
                     .ToList();
 
                 return Ok(Bdays);
@@ -52,6 +55,3 @@ namespace Application.Controllers
         }
     }
 }
-
-
-
