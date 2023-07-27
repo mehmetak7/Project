@@ -49,7 +49,7 @@ namespace Application.Controllers
                     #region Doğum Günü Kontrolü
                     bool isBirthday = false;
                     //Kontrol
-                    isBirthday = functions.LoadBDay("Users.txt", loginRequest.SicilNo);
+                    isBirthday = functions.IsBirthdayToday("Users.txt", loginRequest.SicilNo);
 
 
                     #endregion
