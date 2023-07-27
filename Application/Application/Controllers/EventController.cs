@@ -86,9 +86,41 @@ namespace Application.Controllers
             {
                 return StatusCode(500, $"Error : {ex.Message}");
             }
-           
+        }
 
+        [HttpPost("GetPreviousEvents")]
+        public IActionResult GetPreviousEvent()
+        {
+            try
+            {
+                var today = DateTime.Today;
 
+                var events = System.IO.File.ReadAllLines("Events.txt")
+                    .Select(line =>
+                    {
+                        string[] values = line.Split(';');
+
+                        if (values.Length < 4)
+                            return null;
+
+                        return new EventResponse
+                        {
+                            EventName = values[0],
+                            EventType = values[1],
+                            MeatingDateTime = DateTime.Parse(values[2]),
+                            MeetingNotes = values[3]
+                        };
+
+                    })
+                    .Where(action => action != null && action.MeatingDateTime < today)
+                    .ToList();
+
+                return Ok(events.OrderBy(e => e.MeatingDateTime).ToList());
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Error : {ex.Message}");
+            }
         }
     }
 }
