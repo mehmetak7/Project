@@ -75,7 +75,43 @@ namespace Application.Controllers
             }
         }
 
+          [HttpPost("GetPreviousMeetings")]
+            public IActionResult GetPreviousMeeting()
+            {
+                try
+                {
+                    var today = DateTime.Today;
 
+                    var meetings = System.IO.File.ReadAllLines(filePath)
+                        .Select(line =>
+                        {
+                            string[] values = line.Split(';');
+
+                            if (values.Length < 6)
+                                return null;
+
+                            return new MeetingResponse
+                            {
+                                IsMeeting = true,
+                                TeamName = values[0],
+                                MeetingName = values[1],
+                                MeetingDate = DateTime.Parse(values[2]),
+                                MeetingTime = DateTime.Parse(values[3]),
+                                MeetingContext = values[4],
+                                MeetingContent = values[5]
+                            };
+                        })
+                        .Where(meeting => meeting != null && meeting.MeetingDate < today)
+                        .ToList();
+
+                    return Ok(meetings.OrderBy(meeting => meeting.MeetingDate).ToList());
+                }
+                catch (Exception ex)
+                {
+                    return StatusCode(500, $"Error: {ex.Message}");
+                }
+            }
+        
     }
 
 }
