@@ -31,7 +31,6 @@ namespace Application.Helper
         }
     }
 
-       
         /*
         public bool LoadBDay(string filepath, int InputSicilNo)
         {
@@ -67,13 +66,14 @@ namespace Application.Helper
         //o kişinin doğuum günü mü değil mi o yapılmıyor... asagidaki fonksiyon sadece login de girilen kişinin doğum günü mü
         //değil mi o yapılıyor...
         */
+        /*
         public bool IsBirthdayToday(string filepath, int InputSicilNo)
         {
             string todayDate = DateTime.Now.ToString("dd/MM");
             bool isBirthdayToday = false;
             int? test = InputSicilNo;
 
-            if (InputSicilNo != null)
+            if (test != null)
             {
                 string[] lines = System.IO.File.ReadAllLines(filepath);
 
@@ -92,7 +92,7 @@ namespace Application.Helper
                         if (birthday == todayDate)
                         {
                             isBirthdayToday = true;
-                            return true;
+                            return isBirthdayToday;
                         }
                     }
 
@@ -106,6 +106,40 @@ namespace Application.Helper
             
             return isBirthdayToday;     
         }
+        */
+
+
+        public bool IsBirthdayToday(string filepath, int InputSicilNo)
+        {
+            string todayDate = DateTime.Now.ToString("MM.dd");
+
+            if (InputSicilNo <= 0) // Sicil numarası geçerli bir değer olmalıdır.
+                return false;
+
+            string[] lines = System.IO.File.ReadAllLines(filepath);
+
+            var birthdayLine = lines.FirstOrDefault(line =>
+            {
+                string[] parts = line.Split(";");
+
+                int sicilNo;
+                string date = parts[parts.Length - 1];
+
+                if (int.TryParse(parts[0], out sicilNo) && sicilNo == InputSicilNo)
+                {
+                    string[] dateBD = date.Split("/");
+                    string birthday = dateBD[1] + "." + dateBD[0];
+
+                    return birthday == todayDate;
+                }
+
+                return false;
+            });
+
+            return birthdayLine != null;
+        }
+
+
     }
 }
 
