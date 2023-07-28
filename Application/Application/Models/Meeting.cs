@@ -8,6 +8,7 @@ namespace Application.Models
 
     public class MeetingRequest
     {
+        public int ID { get; set; }
         public string TeamName { get; set; }
         public string MeetingName { get; set; }
         public DateTime MeetingDate { get; set; }
@@ -17,6 +18,7 @@ namespace Application.Models
     }
     public class MeetingResponse
     {
+        public int ID { get; set; }
         public bool IsMeeting { get; set; }
         public string TeamName { get; set; }
         public string MeetingName { get; set; }
@@ -26,5 +28,9 @@ namespace Application.Models
         public string MeetingContent { get; set; }
     }
 
+    public class DeleteMeetingRequest
+    {
+        public int DeleteID { get; set; }
+    }
 
 }
