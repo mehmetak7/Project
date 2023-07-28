@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using static System.Collections.Specialized.BitVector32;
+using Newtonsoft.Json;
 
 
 namespace Application.Controllers
@@ -32,18 +32,19 @@ namespace Application.Controllers
                     {
                         string[] values = line.Split(';');
 
-                        if (values.Length < 6)
+                        if (values.Length < 7)
                             return null;
 
                         return new MeetingResponse
                         {
+                            ID = Int32.Parse(values[0]),
                             IsMeeting = true,
-                            TeamName = values[0],
-                            MeetingName = values[1],
-                            MeetingDate = DateTime.Parse(values[2]),
-                            MeetingTime = DateTime.Parse(values[3]),
-                            MeetingContext = values[4],
-                            MeetingContent = values[5]
+                            TeamName = values[1],
+                            MeetingName = values[2],
+                            MeetingDate = DateTime.Parse(values[3]),
+                            MeetingTime = DateTime.Parse(values[4]),
+                            MeetingContext = values[5],
+                            MeetingContent = values[6]
                         };
                     })
                     .Where(meeting => meeting != null && meeting.MeetingDate >= today)
@@ -57,13 +58,12 @@ namespace Application.Controllers
             }
         }
 
-
         [HttpPost("AddMeeting")]
         public IActionResult AddMeeting([FromBody] MeetingRequest meeting)
         {
             try
             {
-                string newMeeting = $"{meeting.TeamName};{meeting.MeetingName};{meeting.MeetingDate};{meeting.MeetingTime};{meeting.MeetingContext};{meeting.MeetingContent}";
+                string newMeeting = $"{meeting.ID};{meeting.TeamName};{meeting.MeetingName};{meeting.MeetingDate};{meeting.MeetingTime};{meeting.MeetingContext};{meeting.MeetingContent}";
                 System.IO.File.AppendAllText(filePath, newMeeting + Environment.NewLine); //environment newlin = /n anlamýnda
 
                 // Baþarýlý yanýt dönelim.
@@ -75,7 +75,8 @@ namespace Application.Controllers
             }
         }
 
-          [HttpPost("GetPreviousMeetings")]
+
+            [HttpPost("GetPreviousMeetings")]
             public IActionResult GetPreviousMeeting()
             {
                 try
@@ -92,13 +93,14 @@ namespace Application.Controllers
 
                             return new MeetingResponse
                             {
+                                ID = Int32.Parse(values[0]),
                                 IsMeeting = true,
-                                TeamName = values[0],
-                                MeetingName = values[1],
-                                MeetingDate = DateTime.Parse(values[2]),
-                                MeetingTime = DateTime.Parse(values[3]),
-                                MeetingContext = values[4],
-                                MeetingContent = values[5]
+                                TeamName = values[1],
+                                MeetingName = values[2],
+                                MeetingDate = DateTime.Parse(values[3]),
+                                MeetingTime = DateTime.Parse(values[4]),
+                                MeetingContext = values[5],
+                                MeetingContent = values[6]
                             };
                         })
                         .Where(meeting => meeting != null && meeting.MeetingDate < today)
@@ -111,7 +113,38 @@ namespace Application.Controllers
                     return StatusCode(500, $"Error: {ex.Message}");
                 }
             }
-        
+
+        [HttpPost("PostDelete")]
+        public IActionResult DeleteEvent([FromBody] DeleteMeetingRequest deleteRequest)
+        {
+            int removeWithID = deleteRequest.DeleteID;
+            try
+            {
+                var lines = System.IO.File.ReadAllLines("Meeting.txt").ToList();
+                var newLines = new List<string>();
+
+                foreach (var line in lines)
+                {
+                    string[] values = line.Split(';');
+
+                    if (values.Length >= 4 && int.TryParse(values[0], out int eventId) && eventId == removeWithID)
+                    {
+                        continue;
+                    }
+
+                    newLines.Add(line);
+                }
+
+                System.IO.File.WriteAllLines("Meeting.txt", newLines);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Error: {ex.Message}");
+            }
+            return Ok("Deleted With Successfully...");
+        }
+
+
     }
 
 }
