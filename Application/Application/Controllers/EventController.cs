@@ -231,6 +231,48 @@ namespace Application.Controllers
             return Ok("Deleted with successfully..");
         }
 
+                [HttpPost("SearchEvent")]
+        public IActionResult Search(SearchEventRequest searchRequest)
+        {
+            try
+            {
+                string[] events = System.IO.File.ReadAllLines(filePath);
+
+                string searchEventName = searchRequest.EventName;
+                string searchEventType = searchRequest.EventType;
+
+                for (int i = 0; i < events.Length; i++)
+                {
+                    string eventText = events[i];
+                    string[] values = eventText.Split(';');
+
+                    if (values.Length >= 2)
+                    {
+                        if ((string.IsNullOrEmpty(searchEventName) || values[1].Contains(searchEventName)) ||
+                            (string.IsNullOrEmpty(searchEventType) || values[2].Contains(searchEventType)))
+                        {
+                            EventResponse foundEvent= new EventResponse
+                            {
+                                Id = Int32.Parse(values[0]),
+                                EventName = values[1],
+                                EventType = values[2],
+                                EventDateTime = DateTime.Parse(values[3]),
+                                EventNotes = values[4]
+                            };
+
+                            return Ok(foundEvent);
+                        }
+                    }
+                }
+
+                return NotFound("Aranan toplantı bulunamadı.");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Hata: {ex.Message}");
+            }
+        }
+
     }
 }
 
