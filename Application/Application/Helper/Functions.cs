@@ -87,5 +87,13 @@ namespace Application.Helper
 
             throw new ArgumentException("Dosya içinde dolu bir satır bulunamadı.");
         }
+        public bool isManager(int id)
+        {
+            if (id.ToString()[0].ToString() == "1")
+            {
+                return true;
+            }
+            return false;
+        }
     }
 }
