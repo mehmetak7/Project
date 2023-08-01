@@ -242,6 +242,53 @@ namespace Application.Controllers
             return Ok("Deleted With Successfully...");
         }
 
+     [HttpPost("SearchMeeting")]
+        public IActionResult SearchMeeting(SearchRequest searchRequest)
+        {
+            try
+            {
+                string[] meetings = System.IO.File.ReadAllLines(filePath);
 
+                // Ekip adı ve toplantı türü aramak için verileri alalım
+                string searchTeamName = searchRequest.TeamName;
+                string searchMeetingName = searchRequest.MeetingName;
+
+                for (int i = 0; i < meetings.Length; i++)
+                {
+                    string meetingText = meetings[i];
+                    string[] values = meetingText.Split(';');
+
+                    if (values.Length >= 2)
+                    {
+                        // Ekip adı veya toplantı türüne göre arama yapalım
+                        if ((string.IsNullOrEmpty(searchTeamName) || values[1].Contains(searchTeamName)) ||
+                            (string.IsNullOrEmpty(searchMeetingName) || values[2].Contains(searchMeetingName)))
+                        {
+                            // Toplantı verisini oluşturup geri dönelim
+                            MeetingResponse foundMeeting = new MeetingResponse
+                            {
+                                Id = Int32.Parse(values[0]),
+                                IsMeeting = true,
+                                TeamName = values[1],
+                                MeetingName = values[2],
+                                MeetingDate = DateTime.Parse(values[3]),
+                                MeetingTime = DateTime.Parse(values[4]),
+                                MeetingContext = values[5],
+                                MeetingContent = values[6]
+                            };
+
+                            return Ok(foundMeeting);
+                        }
+                    }
+                }
+
+                // Toplantı bulunamazsa NotFound döndürelim
+                return NotFound("Aranan toplantı bulunamadı.");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Hata: {ex.Message}");
+            }
+        }
     }
 }
