@@ -60,5 +60,32 @@ namespace Application.Helper
 
             return birthdayLine != null;
         }
+          public int findLastId(string filepath)
+        {
+            string[] data = System.IO.File.ReadAllLines(filepath);
+
+            if (data == null || data.Length == 0)
+                throw new ArgumentException("Veri listesi boş veya null olamaz.");
+
+            for (int i = data.Length - 1; i >= 0; i--)
+            {
+                if (!string.IsNullOrWhiteSpace(data[i]))
+                {
+                    string lastRow = data[i];
+                    string[] lastRowFields = lastRow.Split(';');
+
+                    if (lastRowFields.Length >= 1 && int.TryParse(lastRowFields[0], out int id))
+                    {
+                        return id;
+                    }
+                    else
+                    {
+                        throw new ArgumentException("Son satırda geçerli bir ID bulunamadı.");
+                    }
+                }
+            }
+
+            throw new ArgumentException("Dosya içinde dolu bir satır bulunamadı.");
+        }
     }
 }
