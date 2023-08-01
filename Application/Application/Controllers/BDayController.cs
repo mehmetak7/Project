@@ -50,8 +50,53 @@ namespace Application.Controllers
             {
                 return StatusCode(500, $"Error: {ex.Message}");
             }
+        }
+         [HttpPost("getUpcomingBDays")]
+        public ActionResult getUpcomingBDays()
+        {
+            try
+            {
+                string todayDate = DateTime.Now.ToString("dd.MM.yyyy");
+                DateTime today = DateTime.Now;
+                DateTime thirtyDaysLater = today.AddDays(30);
 
+                var Bdays = System.IO.File.ReadAllLines(filePath)
+                   .Select(line =>
+                   {
+                       string[] values = line.Split(';');
+                       if (values.Length >= 5)
+                       {
+                           string date = values[4];
+                           string[] dateBD = date.Split("/");
+                           if (DateTime.TryParseExact(date, "dd/MM/yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime birthday))
+                           {
+                               int daysUntilBirthday = (birthday.Month == today.Month && birthday.Day >= today.Day) ?
+                                   (birthday.Day - today.Day) : (birthday.Month - today.Month) * 30 + (birthday.Day - today.Day);
 
+                               if (daysUntilBirthday <= 30 && daysUntilBirthday > 0)
+                               {
+                                   return new BDayResponse
+                                   {
+                                       Name = values[2],
+                                       Surname = values[3],
+                                       BirthDay = values[4],
+                                       CounterOfDay = daysUntilBirthday
+                                   };
+                               }
+                           }
+                       }
+                       return null;
+                   })
+                  .Where(bdayResponse => bdayResponse != null)
+                  .OrderBy(bdayResponse => bdayResponse.CounterOfDay)
+                  .ToList();
+
+                return Ok(Bdays);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Error: {ex.Message}");
+            }
         }
     }
 }
