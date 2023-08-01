@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 
 
@@ -21,7 +22,7 @@ namespace Application.Controllers
         [HttpPost("Login")]
         public ActionResult Login([FromBody] LoginRequest loginRequest)
         {
-
+            
             string logins = functions.LoadLoginsFromFile("Users.txt", loginRequest.SicilNo);
             int? SicilNo;
             string Sifre;
@@ -34,7 +35,7 @@ namespace Application.Controllers
                 SicilNo = int.Parse(parts[0]);
                 Sifre = parts[1];
 
-                if (SicilNo == null || Sifre != loginRequest.Sifre)
+                if (SicilNo == null || Sifre != loginRequest.Sifre || Sifre == null)
                 {
                     var response = new LoginResponse
                     {
@@ -48,14 +49,17 @@ namespace Application.Controllers
                 {
                     #region Doğum Günü Kontrolü
                     bool isBirthday = false;
-                    //Kontrol
                     isBirthday = functions.IsBirthdayToday("Users.txt", loginRequest.SicilNo);
+                    #endregion
 
-
+                    #region Yönetici Kontrol
+                    bool isManager = false;
+                    isManager = functions.isManager(loginRequest.SicilNo);
                     #endregion
 
                     var successResponse = new LoginResponse
                     {
+                        IsManager = isManager,
                         IsSuccessfull = true,
                         Message = "Giriş basarili",
                         IsBirthday = isBirthday
@@ -78,4 +82,5 @@ namespace Application.Controllers
     }
 
 }
+
 
