@@ -1,13 +1,10 @@
 using Application.Helper;
 using Application.Models;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Localization;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
+using static Application.Models.Search;
 
 namespace Application.Controllers
 {
@@ -15,8 +12,8 @@ namespace Application.Controllers
     [ApiController]
     public class EventController : ControllerBase
     {
-        string filePath = "Events.txt";
-        public static Functions functions = new Functions();
+        readonly string filePath = "Events.txt";
+        readonly Functions functions = new();
 
         [HttpPost("GetEvent")]
         public IActionResult GetEvent()
@@ -35,8 +32,8 @@ namespace Application.Controllers
                         if (values.Length < 5)
                             return null;
 
-                        int id;
-                        if (!int.TryParse(values[0], out id))
+
+                        if (!int.TryParse(values[0], out int id))
                             return null;
 
                         string eventName = values[1].Trim();
@@ -47,8 +44,7 @@ namespace Application.Controllers
                         if (string.IsNullOrEmpty(eventType))
                             return null;
 
-                        DateTime eventDateTime;
-                        if (!DateTime.TryParse(values[3], out eventDateTime))
+                        if (!DateTime.TryParse(values[3], out DateTime eventDateTime))
                             return null;
 
                         string eventNotes = values[4].Trim();
@@ -59,7 +55,7 @@ namespace Application.Controllers
                             EventName = eventName,
                             EventType = eventType,
                             EventDateTime = eventDateTime,
-                            EventNotes = eventNotes
+                            EventNotes = eventNotes.Replace("|", "\n")
                         };
                     })
                     .Where(action => action != null && action.EventDateTime >= today)
@@ -81,12 +77,14 @@ namespace Application.Controllers
         [HttpPost("PostEvent")]
         public IActionResult PostEvent([FromBody] EventRequest eventRequest)
         {
+            EventResponse response = new();
             //date null gelirse "" hata veriyor..
             if (eventRequest == null)
                 return BadRequest("EventRequest is null.");
 
-            string[] properties = { eventRequest.Id.ToString(), eventRequest.EventName, eventRequest.EventType, eventRequest.EventDateTime.ToString(), eventRequest.EventNotes };
-            string[] propertyNames = { "Event id", "EventName", "EventType", "EventDateTime", "EventNotes" };
+            string[] properties = { eventRequest.EventName, eventRequest.EventType, eventRequest.EventDateTime.ToString(), eventRequest.EventNotes };
+            // string[] properties = { eventRequest.Id.ToString(), eventRequest.EventName, eventRequest.EventType, eventRequest.EventDateTime.ToString(), eventRequest.EventNotes };
+            string[] propertyNames = { "EventName", "EventType", "EventDateTime", "EventNotes" };
 
             for (int i = 0; i < properties.Length; i++)
             {
@@ -96,7 +94,8 @@ namespace Application.Controllers
 
             try
             {
-                string newEvent = $"{eventRequest.Id};{eventRequest.EventName};{eventRequest.EventType};{eventRequest.EventDateTime};{eventRequest.EventNotes}";
+                string newEvent = $"{response.Id = functions.FindLastId(filePath) + 1}; {eventRequest.EventName};{eventRequest.EventType};{eventRequest.EventDateTime};{eventRequest.EventNotes.Replace("\n", "|")}";
+                //string newEvent = $"{eventRequest.Id};{eventRequest.EventName};{eventRequest.EventType};{eventRequest.EventDateTime};{eventRequest.EventNotes}";
                 System.IO.File.AppendAllText(filePath, Environment.NewLine + newEvent);
 
                 return Ok("Event başarılı bir şekilde eklendi...");
@@ -114,7 +113,7 @@ namespace Application.Controllers
             try
             {
                 string[] events = System.IO.File.ReadAllLines(filePath);
-                string updateMeeting = $"{eventRequest.Id};{eventRequest.EventName};{eventRequest.EventType};{eventRequest.EventDateTime};{eventRequest.EventNotes}";
+                string updateMeeting = $"{eventRequest.Id};{eventRequest.EventName};{eventRequest.EventType};{eventRequest.EventDateTime};{eventRequest.EventNotes.Replace("\n", "|")}";
 
                 int index = Array.FindIndex(events, m => int.TryParse(m.Split(';')[0], out int id) && id == eventRequest.Id);
                 if (index >= 0)
@@ -134,7 +133,6 @@ namespace Application.Controllers
             }
         }
 
-
         [HttpPost("GetPreviousEvents")]
         public IActionResult GetPreviousEvent()
         {
@@ -153,15 +151,13 @@ namespace Application.Controllers
                             return null;
 
                         // Tarih dışında diğer alanlardan biri veya birkaçı null olsa bile eventi gösteriyoruz.
-                        int id;
-                        if (!int.TryParse(values[0], out id))
+                        if (!int.TryParse(values[0], out int id))
                             id = 0;
 
                         string eventName = values[1]?.Trim() ?? string.Empty;
                         string eventType = values[2]?.Trim() ?? string.Empty;
 
-                        DateTime eventDateTime;
-                        if (!DateTime.TryParse(values[3], out eventDateTime))
+                        if (!DateTime.TryParse(values[3], out DateTime eventDateTime))
                             eventDateTime = DateTime.MinValue;
 
                         string eventNotes = values[4]?.Trim() ?? string.Empty;
@@ -231,15 +227,16 @@ namespace Application.Controllers
             return Ok("Deleted with successfully..");
         }
 
-                [HttpPost("SearchEvent")]
-        public IActionResult Search(SearchEventRequest searchRequest)
+        [HttpPost("SearchEvent")]
+        public IActionResult Search([FromBody] SearchEventRequest searchRequest)
         {
             try
             {
                 string[] events = System.IO.File.ReadAllLines(filePath);
 
                 string searchEventName = searchRequest.EventName;
-                string searchEventType = searchRequest.EventType;
+
+                List<EventResponse> foundEvents = new List<EventResponse>();
 
                 for (int i = 0; i < events.Length; i++)
                 {
@@ -248,10 +245,9 @@ namespace Application.Controllers
 
                     if (values.Length >= 2)
                     {
-                        if ((string.IsNullOrEmpty(searchEventName) || values[1].Contains(searchEventName)) ||
-                            (string.IsNullOrEmpty(searchEventType) || values[2].Contains(searchEventType)))
+                        if (string.IsNullOrEmpty(searchEventName) || values[1].Contains(searchEventName, StringComparison.OrdinalIgnoreCase))
                         {
-                            EventResponse foundEvent= new EventResponse
+                            EventResponse foundEvent = new EventResponse
                             {
                                 Id = Int32.Parse(values[0]),
                                 EventName = values[1],
@@ -260,20 +256,22 @@ namespace Application.Controllers
                                 EventNotes = values[4]
                             };
 
-                            return Ok(foundEvent);
+                            foundEvents.Add(foundEvent);
                         }
                     }
                 }
 
-                return NotFound("Aranan toplantı bulunamadı.");
+                if (foundEvents.Count > 0)
+                {
+                    return Ok(foundEvents);
+                }
+
+                return NotFound("Aranan etkinlik bulunamadı.");
             }
             catch (Exception ex)
             {
                 return StatusCode(500, $"Hata: {ex.Message}");
             }
         }
-
     }
 }
-
-
