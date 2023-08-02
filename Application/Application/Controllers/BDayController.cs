@@ -2,6 +2,7 @@ using Application.Helper;
 using Application.Models;
 using Microsoft.AspNetCore.Mvc;
 using System;
+using System.Globalization;
 using System.Linq;
 
 
@@ -11,7 +12,7 @@ namespace Application.Controllers
     [ApiController]
     public class BDayController : Controller
     {
-        string filePath = "Users.txt";
+        readonly string filePath = "Users.txt";
         [HttpPost("GetAllBDay")]
         public ActionResult GetAllBDay()
         {
@@ -50,9 +51,11 @@ namespace Application.Controllers
             {
                 return StatusCode(500, $"Error: {ex.Message}");
             }
+
+
         }
-         [HttpPost("getUpcomingBDays")]
-        public ActionResult getUpcomingBDays()
+        [HttpPost("getUpcomingBDays")]
+        public ActionResult GetUpcomingBDays()
         {
             try
             {
